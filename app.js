@@ -11,7 +11,7 @@ app.use(cors());
 // Parse JSON bodies
 app.use(bodyParser.json());
 
-// Sample user information
+// Updated user information
 const user = {
     full_name: "Ashraya_Agnihotri",
     dob: "22102003",
@@ -19,7 +19,7 @@ const user = {
     roll_number: "RA2111033010149"
 };
 
-// Function to get numbers and alphabets from data array
+// Function to process data array
 const processData = (data) => {
     const numbers = data.filter(item => !isNaN(item));
     const alphabets = data.filter(item => isNaN(item) && item.length === 1);
@@ -42,27 +42,30 @@ app.get('/', (req, res) => {
 app.post('/bfhl', (req, res) => {
     const { data, file_b64 } = req.body;
 
+    // Input validation
     if (!data || !Array.isArray(data)) {
         return res.status(400).json({ is_success: false, message: 'Invalid input data' });
     }
 
     const { numbers, alphabets, highestLowercaseAlphabet } = processData(data);
 
-    // Handle file validation
+    // File handling
     const file_valid = file_b64 && file_b64.startsWith("data:") ? true : false;
-    const file_mime_type = file_valid ? file_b64.split(';')[0].split(':')[1] : null; // Extract MIME type from Base64 string
-    const file_size_kb = file_valid ? Math.ceil((Buffer.from(file_b64.split(',')[1], 'base64')).length / 1024) : null; // Calculate size
+    const file_mime_type = file_valid ? file_b64.split(';')[0].split(':')[1] : null;
+    const file_size_kb = file_valid ? Math.ceil((Buffer.from(file_b64.split(',')[1], 'base64')).length / 1024) : null;
 
     // Build the response
     const response = {
         is_success: true,
         user_id: `${user.full_name}_${user.dob}`,
-        file_valid,
-        file_mime_type,
-        file_size_kb,
-        numbers,
-        alphabets,
-        highest_lowercase_alphabet: highestLowercaseAlphabet
+        email: user.email,
+        roll_number: user.roll_number,
+        numbers: numbers,
+        alphabets: alphabets,
+        highest_lowercase_alphabet: highestLowercaseAlphabet,
+        file_valid: file_valid,
+        file_mime_type: file_mime_type,
+        file_size_kb: file_size_kb
     };
 
     res.json(response);
